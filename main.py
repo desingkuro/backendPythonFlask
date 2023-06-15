@@ -71,12 +71,7 @@ def link():
     else:
         return 'Acceso no autorizado', 401
 
-from flask import jsonify, send_file, make_response
-
-from flask import jsonify, send_file, make_response
-import os
-
-@app.route('/descargar', methods=['POST'])
+@app.route('/descargar', methods=['POST', 'GET'])
 def descargar():
     auth_header = request.headers.get('Authorization')
     if auth_header and auth_header == 'Bearer anmalima601262':
@@ -85,18 +80,23 @@ def descargar():
         itag = data.get('itag')
         yt = YouTube(link)
         stream = yt.streams.get_by_itag(itag)
-        
-        # Descargar el archivo y establecer el encabezado Content-Disposition
-        file_path = f'descarga.{stream.subtype}'
-        response = make_response(send_file(stream.url))
-        filename = os.path.basename(file_path)
-        response.headers.set('Content-Disposition', 'attachment', filename=filename)
-        return response
+        print(f"Link recibido: {link}")
+        print(f"ITAG recibido: {itag}")
+        if stream is not None:
+            print("Entró en el if")
+            # Descargar el archivo en el directorio actual
+            file_path = f'descarga.{stream.subtype}'
+            stream.download(filename=file_path)
+
+            # Establecer el encabezado Content-Disposition y enviar el archivo
+            filename = os.path.basename(file_path)
+            response = make_response(send_file(file_path))
+            response.headers.set('Content-Disposition', 'attachment', filename=filename)
+            return response
+        else:
+            return jsonify({'message': 'No se encontró ninguna transmisión con el itag especificado'})
     else:
-        return jsonify({'message': 'no autorizado'})
-
-
-
+        return jsonify({'message': 'No autorizado'})
 
 
 if __name__ == '__main__':
