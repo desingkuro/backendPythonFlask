@@ -37,8 +37,7 @@ def descargar():
             # Descargar el archivo de video
             video.download(download_path)
             print('Descargado')
-            response = send_file(file_path, as_attachment=True)
-            return response
+            return send_file(file_path, as_attachment=True)
         else:
             return jsonify({'message': 'El video no contiene audio'})
     else:
